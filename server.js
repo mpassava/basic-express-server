@@ -1,13 +1,15 @@
 const express = require("express");
 const app = express();
 
-app.get('/', (req, res) => {
-  res.send('Hello World');
+const method = require('./middleware/method.js');
+
+app.get('/', method, (req, res) => {
+  res.send('Hello API');
 })
 
 app.listen(3000, (err) => {
   if (err) {
-    console.log("Error Starting Server");
+    console.log("Error Starting Server:", err);
     return;
   }
   console.log("Listening On Port 3000");
