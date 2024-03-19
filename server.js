@@ -10,7 +10,12 @@ app.get("/", method, (req, res) => {
 
 app.get("/users", method, (req, res) => {
   res.json(userData);
+  console.log(Object.getPrototypeOf(res));
 });
+
+app.get("/space", method, (req, res) => {
+  res.sendFile('/img/space.jpg', { root: '.'});
+})
 
 app.listen(3000, (err) => {
   if (err) {
