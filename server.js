@@ -31,6 +31,22 @@ app.get("/users", method, (req, res) => {
   });
 });
 
+app.get('/users/:id', method, (req, res) => {
+  const id = req.params.id;
+  db.get("SELECT * FROM users WHERE id = ?", [id], (err, row) => {
+    if (err) {
+      console.error(err.message);
+      res.status(500).json({ error: 'Error Fetching User Data'})
+      return;
+    }
+    if (!row) {
+      res.status(404).json({ error: 'User Not Found'});
+      return;
+    }
+    res.status(200).json(row);
+  })
+})
+
 app.post("/users", method, (req, res) => {
   const { name, username, email, phone } = req.body;
 
