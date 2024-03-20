@@ -76,6 +76,16 @@ app
     res.sendFile("/img/space.jpg", { root: "." });
   });
 
+app
+  .route('/html')
+  .get(method, (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.status(200).send(`
+      <h1>This page is rendered as HTML</h1>
+      <h2>This page is rendered as HTML</h2>
+      <h3>This page is rendered as HTML</h3>
+    `)
+  })
  
 app.listen(3000, (err) => {
   if (err) {
