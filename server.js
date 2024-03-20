@@ -16,9 +16,16 @@ app.get("/", method, (req, res) => {
   res.send("Hello API");
 });
 
-app.get("/users", method, (req, res) => {
-  res.json(userData);
-  console.log(Object.getPrototypeOf(res));
+app.get("/users", method, async (req, res) => {
+  // pull data from the database
+  db.all('SELECT * FROM users', (err, rows) => {
+    if (err) {
+      console.error(err.message);
+      res.status(500).send('Internal Server Error');
+      return
+    }
+    res.json(rows);
+  });
 });
 
 app.get("/space", method, (req, res) => {
