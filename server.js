@@ -1,6 +1,7 @@
 const express = require("express");
-const app = express();
 const sqlite3 = require("sqlite3");
+const app = express();
+
 const db = new sqlite3.Database("test_server_db.sqlite3", (err) => {
   if (err) {
     console.log("error connecting to database");
@@ -12,19 +13,40 @@ const db = new sqlite3.Database("test_server_db.sqlite3", (err) => {
 const method = require("./middleware/method.js");
 const userData = require("./users.json");
 
+app.use(express.json());
+
 app.get("/", method, (req, res) => {
   res.send("Hello API");
 });
 
-app.get("/users", method, async (req, res) => {
+app.get("/users", method, (req, res) => {
   // pull data from the database
-  db.all('SELECT * FROM users', (err, rows) => {
+  db.all("SELECT * FROM users", (err, rows) => {
     if (err) {
       console.error(err.message);
-      res.status(500).send('Internal Server Error');
-      return
+      res.status(500).send("Internal Server Error");
+      return;
     }
     res.json(rows);
+  });
+});
+
+app.post("/users", method, (req, res) => {
+  const { name, username, email, phone } = req.body;
+
+  if (!name || !username || !email || !phone) {
+    res.status(400).json({ error: "Missing Required Fields" });
+  }
+
+  const stmt = `INSERT INTO users (name, username, email, phone) VALUES (?,?,?,?)`;
+  db.run(stmt, [name, username, email, phone], function (err) {
+    if (err) {
+      console.error(err.message);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+    res
+      .status(201)
+      .json({ message: "User Created Successfully", userID: this.lastID });
   });
 });
 
