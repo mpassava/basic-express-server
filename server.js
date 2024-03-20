@@ -15,61 +15,68 @@ const userData = require("./users.json");
 
 app.use(express.json());
 
-app.get("/", method, (req, res) => {
-  res.send("Hello API");
-});
-
-app.get("/users", method, (req, res) => {
-  // pull data from the database
-  db.all("SELECT * FROM users", (err, rows) => {
-    if (err) {
-      console.error(err.message);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
-    res.json(rows);
+app
+  .route("/")
+  .get(method, (req, res) => {
+    res.send("Hello API");
   });
-});
 
-app.get('/users/:id', method, (req, res) => {
-  const id = req.params.id;
-  db.get("SELECT * FROM users WHERE id = ?", [id], (err, row) => {
-    if (err) {
-      console.error(err.message);
-      res.status(500).json({ error: 'Error Fetching User Data'})
-      return;
-    }
-    if (!row) {
-      res.status(404).json({ error: 'User Not Found'});
-      return;
-    }
-    res.status(200).json(row);
+app
+  .route("/users")
+  .get(method, (req, res) => {
+    db.all("SELECT * FROM users", (err, rows) => {
+      if (err) {
+        console.error(err.message);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      res.json(rows);
+    });
   })
-})
+  .post(method, (req, res) => {
+    const { name, username, email, phone } = req.body;
 
-app.post("/users", method, (req, res) => {
-  const { name, username, email, phone } = req.body;
-
-  if (!name || !username || !email || !phone) {
-    res.status(400).json({ error: "Missing Required Fields" });
-  }
-
-  const stmt = `INSERT INTO users (name, username, email, phone) VALUES (?,?,?,?)`;
-  db.run(stmt, [name, username, email, phone], function (err) {
-    if (err) {
-      console.error(err.message);
-      res.status(500).json({ error: "Internal Server Error" });
+    if (!name || !username || !email || !phone) {
+      res.status(400).json({ error: "Missing Required Fields" });
     }
-    res
-      .status(201)
-      .json({ message: "User Created Successfully", userID: this.lastID });
+
+    const query = `INSERT INTO users (name, username, email, phone) VALUES (?,?,?,?)`;
+    db.run(query, [name, username, email, phone], function (err) {
+      if (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+      res
+        .status(201)
+        .json({ message: "User Created Successfully", userID: this.lastID });
+    });
   });
-});
 
-app.get("/space", method, (req, res) => {
-  res.sendFile("/img/space.jpg", { root: "." });
-});
+app
+  .route('/users/:id')
+  .get(method, (req, res) => {
+    const id = req.params.id;
+    db.get("SELECT * FROM users WHERE id = ?", [id], (err, row) => {
+      if (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Error Fetching User Data" });
+        return;
+      }
+      if (!row) {
+        res.status(404).json({ error: "User Not Found" });
+        return;
+      }
+      res.status(200).json(row);
+    });
+  });
 
+app
+  .route('/space')
+  .get(method, (req, res) => {
+    res.sendFile("/img/space.jpg", { root: "." });
+  });
+
+ 
 app.listen(3000, (err) => {
   if (err) {
     return console.log("Error Starting Server:", err);
